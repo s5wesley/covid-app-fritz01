@@ -1,26 +1,19 @@
-# Stage 1: Build stage
-FROM ubuntu:latest AS builder
+FROM ubuntu:latest
 
-# Set the maintainer label
-LABEL maintainer="wesleymbarga@gmail.com"
+# Install Apache and other dependencies if needed
+RUN apt-get update && apt-get install -y apache2 wget unzip
 
-# Update package index and install required packages
-RUN apt-get update && apt-get install -y wget unzip
+# Download the covid19.zip file
+RUN wget https://linux-devops-course.s3.amazonaws.com/WEB+SIDE+HTML/covid19.zip
 
-# Download the application zip file
-RUN wget -O /tmp/covid19.zip https://linux-devops-course.s3.amazonaws.com/WEB+SIDE+HTML/covid19.zip
+# Remove existing content from /var/www/html
+RUN rm -rf /var/www/html/*
 
-# Unzip the application
-RUN unzip /tmp/covid19.zip -d /app
+# Unzip the covid19.zip file into /var/www/html/
+RUN unzip covid19.zip -d /var/www/html/
 
-# Stage 2: Final stage
-FROM gcr.io/distroless/static-debian12
-
-# Copy the application files from the build stage
-COPY --from=builder /app /var/www/html
-
-# Expose port 80 to the outside world
+# Expose port 80 for Apache
 EXPOSE 80
 
-# Use distroless image entrypoint and command to start Apache
-CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+# Set Apache as the default command
+CMD ["apache2ctl", "-D", "FOREGROUND"]
