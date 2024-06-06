@@ -1,19 +1,13 @@
-FROM ubuntu:latest
-
-# Install Apache and other dependencies if needed
-RUN apt-get update && apt-get install -y apache2 wget unzip
-
-# Download the covid19.zip file
+FROM  ubuntu
+RUN apt update -y
+RUN apt install -y unzip wget  apache2
+WORKDIR  /var/www/html
 RUN wget https://linux-devops-course.s3.amazonaws.com/WEB+SIDE+HTML/covid19.zip
+RUN unzip covid19.zip
+RUN cp -r covid19/* /var/www/html
+RUN rm -rf covid19.zip
+COPY . .
 
-# Remove existing content from /var/www/html
-RUN rm -rf /var/www/html/*
+expose 80
 
-# Unzip the covid19.zip file into /var/www/html/
-RUN unzip covid19.zip -d /var/www/html/
-
-# Expose port 80 for Apache
-EXPOSE 80
-
-# Set Apache as the default command
 CMD ["apache2ctl", "-D", "FOREGROUND"]
